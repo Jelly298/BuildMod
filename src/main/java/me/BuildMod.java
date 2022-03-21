@@ -10,6 +10,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
@@ -570,15 +571,15 @@ public class BuildMod {
                 try {
                     mc.thePlayer.sendChatMessage("/bz");
                     Thread.sleep(1000);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 0, 0, 0, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 0, 0, 0);
                     Thread.sleep(1000);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 31, 0, 0, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 31, 0, 0);
                     Thread.sleep(1000);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 12, 0, 0, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 12, 0, 0);
                     Thread.sleep(1000);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 10, 0, 0, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 10, 0, 0);
                     Thread.sleep(1000);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 14, 0, 0, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 14, 0, 0);
                     Thread.sleep(1000);
                     mc.thePlayer.closeScreen();
                     ScheduleRunnable(openPouch, 1, TimeUnit.SECONDS);
@@ -607,7 +608,7 @@ public class BuildMod {
                 try {
                     if (hasNetherwartInInv()) {
 
-                        mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithNetherwart(), 0, 1, mc.thePlayer);
+                        clickWindow(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithNetherwart(), 0, 1);
                         if (hasNetherwartInInv()) {
                             if (!isContainerFull())
                                 ScheduleRunnable(PutNetherwartInPouch, 500, TimeUnit.MILLISECONDS);
@@ -834,10 +835,10 @@ public class BuildMod {
                 Thread.sleep(100);
                 KeyBinding.onTick(keyBindUseItem);
                 Thread.sleep(800);
-                mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 22, 0, 0, mc.thePlayer);
+                clickWindow(mc.thePlayer.openContainer.windowId, 22, 0, 0);
                 Thread.sleep(800);
                 while(hasSoulSandInInv()) {
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithSoulSand(), 0, 0, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithSoulSand(), 0, 0);
                     Thread.sleep(600);
                 }
                 mc.thePlayer.closeScreen();
@@ -943,9 +944,9 @@ public class BuildMod {
                         Slot slot = currentContainer.inventorySlots.inventorySlots.get(16);
                         if (slot != null) {
                             if (slot.getStack() != null) {
-                                mc.playerController.windowClick(currentContainer.inventorySlots.windowId, 16, 1, 0, mc.thePlayer);
+                                clickWindow(currentContainer.inventorySlots.windowId, 16, 1, 0);
                                 Thread.sleep(1000);
-                                mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 10, 1, 0, mc.thePlayer);
+                                clickWindow(mc.thePlayer.openContainer.windowId, 10, 1, 0);
                                 Thread.sleep(1000);
                                 ScheduleRunnable(buySoulSand, 2, TimeUnit.SECONDS);
                             }
@@ -963,7 +964,7 @@ public class BuildMod {
         public void run() {
             if(enabled) {
 
-                mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 24, 0, 0, mc.thePlayer);
+                clickWindow(mc.thePlayer.openContainer.windowId, 24, 0, 0);
 
                 if (mc.thePlayer.inventory.getFirstEmptyStack() == -1) {
                     mc.thePlayer.closeScreen();
@@ -1000,7 +1001,7 @@ public class BuildMod {
             if(enabled) {
                 if (hasSoulSandInInv()) {
 
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithSoulSand(), 0, 1, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithSoulSand(), 0, 1);
 
                     if (hasSoulSandInInv()) {
                         if (!isContainerFull())
@@ -1011,7 +1012,7 @@ public class BuildMod {
                             if (refilling) {
                                 ScheduleRunnable(backToIslandPrep, 3, TimeUnit.SECONDS);
                             } else {
-                                ScheduleRunnable(jumpAndPlaceBlock, 3, TimeUnit.SECONDS);
+                                ScheduleRunnable(prepPlaceBlock, 3, TimeUnit.SECONDS);
                             }
 
                         }
@@ -1024,7 +1025,7 @@ public class BuildMod {
         }
     };
 
-    Runnable jumpAndPlaceBlock = new Runnable() {
+    Runnable prepPlaceBlock = new Runnable() {
         @Override
         public void run() {
             if (enabled) {
@@ -1034,15 +1035,15 @@ public class BuildMod {
                     KeyBinding.onTick(keyBindAttack);
 
                     Thread.sleep(1000);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 1, 0, 1, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 1, 0, 1);
                     Thread.sleep(500);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 2, 0, 1, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 2, 0, 1);
                     Thread.sleep(500);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 3, 0, 1, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 3, 0, 1);
                     Thread.sleep(500);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 4, 0, 1, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 4, 0, 1);
                     Thread.sleep(500);
-                    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 5, 0, 1, mc.thePlayer);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 5, 0, 1);
                     Thread.sleep(500);
 
                     mc.thePlayer.closeScreen();
@@ -1085,6 +1086,13 @@ public class BuildMod {
         moved = true;
         KeyBinding.setKeyBindState(keyBindBackward, false);
         ScheduleRunnable(MoveBack, 500, TimeUnit.MILLISECONDS);
+    }
+    void clickWindow(int windowID, int slotID, int mouseButtonClicked, int mode){
+       if(mc.thePlayer.openContainer instanceof ContainerChest || mc.currentScreen instanceof  GuiInventory)
+           mc.playerController.windowClick(windowID, slotID, mouseButtonClicked, mode, mc.thePlayer);
+       else
+           mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
+                   "[Build Helper] : Didn't open window! This shouldn't happen and the script has been disabled. Please immediately report to the developer." ));
     }
     void changeSoulSandPlaceProcess(){
         setKeyBindState(keyBindBackward, false);
@@ -1284,7 +1292,7 @@ public class BuildMod {
                 refilling = false;
                 setZ = false;
                 moved = false;
-                ScheduleRunnable(jumpAndPlaceBlock, 1, TimeUnit.SECONDS);
+                ScheduleRunnable(prepPlaceBlock, 1, TimeUnit.SECONDS);
 
 
             }
