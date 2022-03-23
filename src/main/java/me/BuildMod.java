@@ -968,9 +968,9 @@ public class BuildMod {
         public void run() {
             if(enabled) {
                 mc.thePlayer.inventory.currentItem = 0;
-                setrot(40);
+                setrot(60);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1197,6 +1197,7 @@ public class BuildMod {
         return 0;
 
     }
+
     void stop(){
         mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Disabling script"));
         resetKeyBindState();
@@ -1328,6 +1329,11 @@ public class BuildMod {
         if(e.message.getUnformattedText().contains("You don't have that many")){
             placeSoulSandBlock2 = false;
             noSoulSand = true;
+        }
+        if(e.message.getUnformattedText().contains("You have sent a trade request")){
+            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
+                    "[Build Helper] : Clicked on some other players! The script has been disabled. Please do /warp home and /hub and press G."));
+            enabled = false;
         }
     }
 
