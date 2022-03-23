@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
@@ -28,13 +27,7 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.lwjgl.input.Keyboard;
-
-import javax.swing.text.JTextComponent;
 import java.lang.reflect.Field;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -148,8 +141,6 @@ public class BuildMod {
             lengthZ = Math.abs(corner2z - corner1z);
 
             if (placeBlock1) {
-
-
                 setHotbarIndex(1);
                 if (corner2z - corner1z > 0)
                     setrot(180);
@@ -157,9 +148,7 @@ public class BuildMod {
                     setrot(0);
 
                 setpitch(82);
-                if (dx == 0 && dz == 0) {
-                    KeyBinding.onTick(keyBindUseItem);
-                }
+                setKeyBindState(keyBindUseItem, dx == 0 && dz == 0);
                 setKeyBindState(keyBindBackward, true);
                 setKeyBindState(keyBindSneak, true);
 
@@ -179,11 +168,7 @@ public class BuildMod {
                     setrot(-90);
 
                 setpitch(82);
-                if (dx == 0 && dz == 0)
-                    setKeyBindState(keyBindUseItem, true);
-                else
-                    setKeyBindState(keyBindUseItem, false);
-
+                setKeyBindState(keyBindUseItem, dx == 0 && dz == 0);
                 setKeyBindState(keyBindBackward, true);
                 setKeyBindState(keyBindSneak, true);
 
@@ -519,17 +504,11 @@ public class BuildMod {
             if (placingNetherwart) {
                 setHotbarIndex(2);
                 setpitch(58);
-                if (leftSide) {
-                    if (sameSide)
-                        placeNWGoingLeft = false;
-                    else
-                        placeNWGoingLeft = true;
-                } else {
-                    if (sameSide)
-                        placeNWGoingLeft = true;
-                    else
-                        placeNWGoingLeft = false;
-                }
+                if (leftSide)
+                    placeNWGoingLeft = !sameSide;
+                else
+                    placeNWGoingLeft = sameSide;
+
                 if (!buyingNetherwart && !startedBuyingNetherwart) {
                     setKeyBindState(keyBindSneak, true);
                     setKeyBindState(keyBindUseItem, true);
@@ -673,7 +652,7 @@ public class BuildMod {
         @Override
         public void run() {
 
-            try {;
+            try {
                 setrot(digAngle);
                 setKeyBindState(keyBindForward, false);
                 mc.thePlayer.rotationPitch = 45;
@@ -1168,12 +1147,8 @@ public class BuildMod {
     boolean hasSoulSandInInv(){
         for(Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot != null) {
-                try {
-                    if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand))) {
-                        return true;
-                    }
-                } catch(Exception e){
-
+                if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand))) {
+                    return true;
                 }
             }
         }
@@ -1182,26 +1157,16 @@ public class BuildMod {
     boolean hasNetherwartInInv(){
         for(Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot != null) {
-                try {
-                    if (slot.getStack().getItem().equals(Items.nether_wart)) {
-                        return true;
-                    }
-                } catch(Exception e){
-
-                }
+                if (slot.getStack().getItem().equals(Items.nether_wart))
+                    return true;
             }
         }
         return false;
     }
     boolean isContainerFull(){
         for(int i  = 0; i < 54; i ++) {
-            try {
-                if (mc.thePlayer.openContainer.inventorySlots.get(i).getStack()== null) {
-                    return false;
-                }
-            } catch(Exception e){
-
-            }
+            if (mc.thePlayer.openContainer.inventorySlots.get(i).getStack()== null)
+                return false;
         }
         return true;
 
@@ -1274,7 +1239,7 @@ public class BuildMod {
         rotated = false;
 
     }
-    void rotate(final int rotation360){
+    void rotateTo(final int rotation360){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -1321,7 +1286,6 @@ public class BuildMod {
                 refilling = false;
                 setZ = false;
                 moved = false;
-
                 process1 = true;
 
             }
@@ -1335,8 +1299,6 @@ public class BuildMod {
                 setZ = false;
                 moved = false;
                 ScheduleRunnable(prepPlaceBlock, 1, TimeUnit.SECONDS);
-
-
             }
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_P)){
@@ -1345,7 +1307,6 @@ public class BuildMod {
                 corner1x = (int)mc.thePlayer.posX;
                 corner1y = (int)mc.thePlayer.posY - 1;
                 corner1z = (int)mc.thePlayer.posZ;
-
                 setmode = 1 - setmode;
             }
             else {
