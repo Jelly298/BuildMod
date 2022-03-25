@@ -617,6 +617,7 @@ public class BuildMod {
         public void run() {
 
             try {
+                digAngle = (corner2z - corner1z > 0)? 0 : 180;
                 setrot(digAngle);
                 setKeyBindState(keyBindForward, true);
                 setpitch(45);
@@ -922,7 +923,7 @@ public class BuildMod {
             if(enabled) {
                 try {
                     setrot(13);
-
+                    Thread.sleep(500);
                     KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
                     Thread.sleep(2000);
                     if (mc.currentScreen instanceof GuiChest) {
@@ -940,7 +941,7 @@ public class BuildMod {
                     }
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+
                 }
             }
         }
@@ -980,10 +981,10 @@ public class BuildMod {
         }
     };
 
-
     Runnable PlaceSoulSandInWand = new Runnable() {
         @Override
         public void run() {
+
             if(enabled) {
                 if (hasSoulSandInInv()) {
 
@@ -1006,6 +1007,8 @@ public class BuildMod {
                         mc.thePlayer.closeScreen();
                         ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
                     }
+                } else {
+
                 }
             }
         }
@@ -1145,10 +1148,15 @@ public class BuildMod {
     }
 
     boolean hasSoulSandInInv(){
+
         for(Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot != null) {
-                if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand))) {
-                    return true;
+                try {
+                    if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand))) {
+                        return true;
+                    }
+                }catch(Exception e){
+
                 }
             }
         }
@@ -1157,16 +1165,24 @@ public class BuildMod {
     boolean hasNetherwartInInv(){
         for(Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot != null) {
-                if (slot.getStack().getItem().equals(Items.nether_wart))
-                    return true;
+                try {
+                    if (slot.getStack().getItem().equals(Items.nether_wart))
+                        return true;
+                }catch(Exception e){
+
+                }
             }
         }
         return false;
     }
     boolean isContainerFull(){
         for(int i  = 0; i < 54; i ++) {
-            if (mc.thePlayer.openContainer.inventorySlots.get(i).getStack()== null)
-                return false;
+            try {
+                if (mc.thePlayer.openContainer.inventorySlots.get(i).getStack() == null)
+                    return false;
+            }catch (Exception e){
+
+            }
         }
         return true;
 
@@ -1175,8 +1191,12 @@ public class BuildMod {
         for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot != null) {
                 if (slot.getStack() != null) {
-                    if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand)))
-                        return slot.slotNumber;
+                    try {
+                        if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand)))
+                            return slot.slotNumber;
+                    }catch(Exception e){
+
+                    }
                 }
             }
 
@@ -1188,8 +1208,12 @@ public class BuildMod {
         for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot != null) {
                 if (slot.getStack() != null) {
-                    if (slot.getStack().getItem().equals(Items.nether_wart))
-                        return slot.slotNumber;
+                    try {
+                        if (slot.getStack().getItem().equals(Items.nether_wart))
+                            return slot.slotNumber;
+                    }catch(Exception e){
+
+                    }
                 }
             }
 
@@ -1275,6 +1299,7 @@ public class BuildMod {
                  setZ = false;
                  moved = false;
                  placeBlock1 = true;
+               // System.out.println(hasSoulSandInInv());//ScheduleRunnable(PlaceSoulSandInWand,500, TimeUnit.MILLISECONDS);
             } else {
                 stop();
             }
@@ -1293,13 +1318,37 @@ public class BuildMod {
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_H)){
             if(!enabled) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Placing Soul Sand with builder's wand)"));
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Placing Soul Sand 1)"));
                 enabled = true;
                 noSoulSand = false;
                 refilling = false;
                 setZ = false;
                 moved = false;
                 ScheduleRunnable(prepPlaceBlock, 1, TimeUnit.SECONDS);
+            }
+        }
+        if(Keyboard.isKeyDown(Keyboard.KEY_J)){
+            if(!enabled) {
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Digging soul sand)"));
+                enabled = true;
+                noSoulSand = false;
+                refilling = false;
+                setZ = false;
+                moved = false;
+                endSoulSandPlaceProcess();
+            }
+        }
+        if(Keyboard.isKeyDown(Keyboard.KEY_K)){
+            if(!enabled) {
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Buying Netherwart)"));
+                enabled = true;
+                noSoulSand = false;
+                refilling = false;
+                setZ = false;
+                moved = false;
+                startedBuyingNetherwart = false;
+                placingNetherwart = true;
+                buyingNetherwart = true;
             }
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_P)){
@@ -1332,7 +1381,7 @@ public class BuildMod {
         }
         if(e.message.getUnformattedText().contains("You have sent a trade request")){
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
-                    "[Build Helper] : Clicked on some other players! The script has been disabled. Please do /warp home and /hub and press G."));
+                    "[Build Helper] : Clicked on some other players! The script has been disabled. Please do /warp home and /hub and press G or H."));
             enabled = false;
         }
     }
