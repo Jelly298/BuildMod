@@ -13,7 +13,7 @@ public class Utils {
     {
         for(Entity entity : Minecraft.getMinecraft().theWorld.getLoadedEntityList()){
             if(entity instanceof EntityPlayer){
-                if(Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity) < 5)
+                if(Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity) < 0.5f)
                     return true;
             }
         }
