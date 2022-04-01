@@ -1,0 +1,98 @@
+package me;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
+
+public class Utils {
+    public static boolean hasPlayerNearby()
+    {
+        for(Entity entity : Minecraft.getMinecraft().theWorld.getLoadedEntityList()){
+            if(entity instanceof EntityPlayer){
+                if(Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity) < 5)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasSoulSandInInv(){
+
+        for(Slot slot : Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots) {
+            if (slot != null) {
+                try {
+                    if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand))) {
+                        return true;
+                    }
+                }catch(Exception e){
+
+                }
+            }
+        }
+        return false;
+    }
+    public static boolean hasNetherwartInInv(){
+        for(Slot slot : Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots) {
+            if (slot != null) {
+                try {
+                    if (slot.getStack().getItem().equals(Items.nether_wart))
+                        return true;
+                }catch(Exception e){
+
+                }
+            }
+        }
+        return false;
+    }
+    public static boolean isContainerFull(){
+        for(int i  = 0; i < 54; i ++) {
+            try {
+                if (Minecraft.getMinecraft().thePlayer.openContainer.inventorySlots.get(i).getStack() == null)
+                    return false;
+            }catch (Exception e){
+
+            }
+        }
+        return true;
+
+    }
+    public static int getFirstSlotWithSoulSand() {
+        for (Slot slot : Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots) {
+            if (slot != null) {
+                if (slot.getStack() != null) {
+                    try {
+                        if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand)))
+                            return slot.slotNumber;
+                    }catch(Exception e){
+
+                    }
+                }
+            }
+
+        }
+        return 0;
+
+    }
+    public static int getFirstSlotWithNetherwart() {
+        for (Slot slot : Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots) {
+            if (slot != null) {
+                if (slot.getStack() != null) {
+                    try {
+                        if (slot.getStack().getItem().equals(Items.nether_wart))
+                            return slot.slotNumber;
+                    }catch(Exception e){
+
+                    }
+                }
+            }
+
+        }
+        return 0;
+
+    }
+
+}

@@ -7,6 +7,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.ContainerChest;
@@ -27,7 +29,9 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.lwjgl.input.Keyboard;
+
 import java.lang.reflect.Field;
+import java.sql.Time;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +79,7 @@ public class BuildMod {
     boolean placingNetherwart = false;
     boolean buyingNetherwart = false;
     boolean startedBuyingNetherwart = false;
-    boolean rotated = false;
+    static boolean rotated = false;
 
     int corner1x = 0;
     int corner1y = 0;
@@ -182,7 +186,7 @@ public class BuildMod {
                     ScheduleRunnable(WarpHub, 1500, TimeUnit.MILLISECONDS);
                 }
             }
-            if (process1) {
+            /*if (process1) {
                 setrot(90);
                 setKeyBindState(keyBindForward, true);
                 if ((int) mc.thePlayer.posX == -11) {
@@ -216,7 +220,7 @@ public class BuildMod {
                 setKeyBindState(keyBindForward, false);
                 ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
                 process5 = false;
-            }
+            }*/
 
 
             if (placeSoulSandBlock1) {
@@ -540,11 +544,82 @@ public class BuildMod {
         }
 
 
-
-
-
     }
+    Runnable Baritone = new Runnable() {
+        @Override
+        public void run() {
+            if(enabled) {
 
+                try { //-2 -69
+                    rotateTo(90);
+                    Thread.sleep(3000);
+                    process1 = true;
+                    while (process1) {
+                        setKeyBindState(keyBindForward, true);
+                        if ((int) mc.thePlayer.posX == -11) {
+                            setKeyBindState(keyBindForward, false);
+                            rotateTo(0);
+                            Thread.sleep(3000);
+                            process1 = false;
+                            process2 = true;
+                        }
+                    }
+                    while (process2) {
+                        setKeyBindState(keyBindForward, true);
+                        if ((int) mc.thePlayer.posZ == -47) {
+                            setKeyBindState(keyBindForward, false);
+                            rotateTo(90);
+                            Thread.sleep(3000);
+                            process2 = false;
+                            process3 = true;
+                        }
+                    }
+                    while (process3) {
+                        setKeyBindState(keyBindForward, true);
+                        if ((int) mc.thePlayer.posX == -50) {
+                            setKeyBindState(keyBindForward, false);
+                            rotateTo(0);
+                            Thread.sleep(3000);
+                            process3 = false;
+                            process4 = true;
+                        }
+                    }
+                    while (process4) {
+                        setrot(0);
+                        setKeyBindState(keyBindForward, true);
+                        if ((int) mc.thePlayer.posZ == -29) {
+                            setKeyBindState(keyBindForward, false);
+                            rotateTo(0);
+                            Thread.sleep(3000);
+                            process4 = false;
+                            process5 = true;
+                        }
+
+                    }
+                    while (process5) {
+                        setKeyBindState(keyBindForward, false);
+                        setrot(0);
+                        if(!Utils.hasPlayerNearby()) {
+                            ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
+                            process5 = false;
+                        } else {
+
+                            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
+                                    "[Build Helper] : Detected players nearby"));
+                            Thread.sleep(500);
+                            mc.thePlayer.sendChatMessage("/warp home");
+                            Thread.sleep(3000);
+                            mc.thePlayer.sendChatMessage("/hub");
+                            ScheduleRunnable(Baritone, 3, TimeUnit.SECONDS);
+                            process5 = false;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
     Runnable BuyNetherwart = new Runnable() {
         @Override
         public void run() {
@@ -588,11 +663,11 @@ public class BuildMod {
 
             if(enabled) {
                 try {
-                    if (hasNetherwartInInv()) {
+                    if (Utils.hasNetherwartInInv()) {
 
-                        clickWindow(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithNetherwart(), 0, 1);
-                        if (hasNetherwartInInv()) {
-                            if (!isContainerFull())
+                        clickWindow(mc.thePlayer.openContainer.windowId, 45 + Utils.getFirstSlotWithNetherwart(), 0, 1);
+                        if (Utils.hasNetherwartInInv()) {
+                            if (!Utils.isContainerFull())
                                 ScheduleRunnable(PutNetherwartInPouch, 500, TimeUnit.MILLISECONDS);
                             else {
                                 startedBuyingNetherwart = false;
@@ -820,8 +895,8 @@ public class BuildMod {
                 Thread.sleep(800);
                 clickWindow(mc.thePlayer.openContainer.windowId, 22, 0, 0);
                 Thread.sleep(800);
-                while(hasSoulSandInInv()) {
-                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithSoulSand(), 0, 0);
+                while(Utils.hasSoulSandInInv()) {
+                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + Utils.getFirstSlotWithSoulSand(), 0, 0);
                     Thread.sleep(600);
                 }
                 mc.thePlayer.closeScreen();
@@ -986,12 +1061,12 @@ public class BuildMod {
         public void run() {
 
             if(enabled) {
-                if (hasSoulSandInInv()) {
+                if (Utils.hasSoulSandInInv()) {
 
-                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + getFirstSlotWithSoulSand(), 0, 1);
+                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + Utils.getFirstSlotWithSoulSand(), 0, 1);
 
-                    if (hasSoulSandInInv()) {
-                        if (!isContainerFull())
+                    if (Utils.hasSoulSandInInv()) {
+                        if (!Utils.isContainerFull())
                             ScheduleRunnable(PlaceSoulSandInWand, 500, TimeUnit.MILLISECONDS);
                         else {
                             mc.thePlayer.closeScreen();
@@ -1084,11 +1159,7 @@ public class BuildMod {
                 (mc.thePlayer.rotationYaw % 360 > 180 ? -(180 - (mc.thePlayer.rotationYaw % 360 - 180)) :  mc.thePlayer.rotationYaw % 360  ) :
                 (-mc.thePlayer.rotationYaw % 360 > 180 ? (180 - (-mc.thePlayer.rotationYaw % 360 - 180))  :  -(-mc.thePlayer.rotationYaw % 360));
     }
-    float get360RotationYaw(){
-        return mc.thePlayer.rotationYaw > 0?
-                (mc.thePlayer.rotationYaw % 360) :
-                (mc.thePlayer.rotationYaw < 360f ? 360 - (-mc.thePlayer.rotationYaw % 360)  :  360 + mc.thePlayer.rotationYaw);
-    }
+
     void clickWindow(int windowID, int slotID, int mouseButtonClicked, int mode){
        if(mc.thePlayer.openContainer instanceof ContainerChest || mc.currentScreen instanceof  GuiInventory)
            mc.playerController.windowClick(windowID, slotID, mouseButtonClicked, mode, mc.thePlayer);
@@ -1147,78 +1218,55 @@ public class BuildMod {
         }
     }
 
-    boolean hasSoulSandInInv(){
 
-        for(Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-            if (slot != null) {
-                try {
-                    if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand))) {
-                        return true;
+    public static float get360RotationYaw(){
+        return Minecraft.getMinecraft().thePlayer.rotationYaw > 0?
+                (Minecraft.getMinecraft().thePlayer.rotationYaw % 360) :
+                (Minecraft.getMinecraft().thePlayer.rotationYaw < 360f ? 360 - (-Minecraft.getMinecraft().thePlayer.rotationYaw % 360)  :  360 + Minecraft.getMinecraft().thePlayer.rotationYaw);
+    }
+
+    public static void rotateTo(final int rotation360){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                while (get360RotationYaw() != rotation360) {
+                    if(Math.abs(rotation360 - get360RotationYaw()) < 2) {
+                        Minecraft.getMinecraft().thePlayer.rotationYaw = (int)(Minecraft.getMinecraft().thePlayer.rotationYaw + (rotation360 - get360RotationYaw()));
+                        break;
                     }
-                }catch(Exception e){
-
-                }
-            }
-        }
-        return false;
-    }
-    boolean hasNetherwartInInv(){
-        for(Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-            if (slot != null) {
-                try {
-                    if (slot.getStack().getItem().equals(Items.nether_wart))
-                        return true;
-                }catch(Exception e){
-
-                }
-            }
-        }
-        return false;
-    }
-    boolean isContainerFull(){
-        for(int i  = 0; i < 54; i ++) {
-            try {
-                if (mc.thePlayer.openContainer.inventorySlots.get(i).getStack() == null)
-                    return false;
-            }catch (Exception e){
-
-            }
-        }
-        return true;
-
-    }
-    int getFirstSlotWithSoulSand() {
-        for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-            if (slot != null) {
-                if (slot.getStack() != null) {
+                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.5f;
                     try {
-                        if (slot.getStack().getItem().equals(Item.getItemFromBlock(Blocks.soul_sand)))
-                            return slot.slotNumber;
-                    }catch(Exception e){
-
+                        Thread.sleep(2);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
-
-        }
-        return 0;
+        }).start();
 
     }
-    int getFirstSlotWithNetherwart() {
-        for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-            if (slot != null) {
-                if (slot.getStack() != null) {
-                    try {
-                        if (slot.getStack().getItem().equals(Items.nether_wart))
-                            return slot.slotNumber;
-                    }catch(Exception e){
+    public static void rotateClockwise(final int rotationClockwise){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int initialYaw = (int)Minecraft.getMinecraft().thePlayer.rotationYaw;
+                while (Minecraft.getMinecraft().thePlayer.rotationYaw != initialYaw + rotationClockwise) {
+                    if(Math.abs(Minecraft.getMinecraft().thePlayer.rotationYaw - initialYaw + rotationClockwise) < 2) {
+                        Minecraft.getMinecraft().thePlayer.rotationYaw = (int)(Minecraft.getMinecraft().thePlayer.rotationYaw + rotationClockwise);
+                        break;
+                    }
 
+                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.5f;
+                    try {
+                        Thread.sleep(2);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
-            }
 
-        }
-        return 0;
+            }
+        }).start();
 
     }
 
@@ -1264,25 +1312,7 @@ public class BuildMod {
         rotated = false;
 
     }
-    void rotateTo(final int rotation360){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while ((int)get360RotationYaw() != rotation360) {
-                    if(Math.abs(rotation360 - get360RotationYaw()) > 180)
-                        mc.thePlayer.rotationYaw += 1f;
-                    else
-                        mc.thePlayer.rotationYaw -= 1f;
-                    try {
-                        Thread.sleep(10);
-                    } catch(Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
 
-    }
 
 
 
@@ -1293,13 +1323,12 @@ public class BuildMod {
             if(!enabled) {
 
                 mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script"));
-                enabled = true;
+               enable();
                  noSoulSand = false;
                  refilling = false;
                  setZ = false;
                  moved = false;
                  placeBlock1 = true;
-               // System.out.println(hasSoulSandInInv());//ScheduleRunnable(PlaceSoulSandInWand,500, TimeUnit.MILLISECONDS);
             } else {
                 stop();
             }
@@ -1307,19 +1336,15 @@ public class BuildMod {
         if(Keyboard.isKeyDown(Keyboard.KEY_G)){
             if(!enabled) {
                 mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Buying Soul Sand)"));
-                enabled = true;
-                noSoulSand = false;
-                refilling = false;
-                setZ = false;
-                moved = false;
-                process1 = true;
+                enable();
+                ScheduleRunnable(Baritone, 1, TimeUnit.SECONDS);
 
             }
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_H)){
             if(!enabled) {
                 mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Placing Soul Sand 1)"));
-                enabled = true;
+                enable();
                 noSoulSand = false;
                 refilling = false;
                 setZ = false;
@@ -1330,7 +1355,7 @@ public class BuildMod {
         if(Keyboard.isKeyDown(Keyboard.KEY_J)){
             if(!enabled) {
                 mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Digging soul sand)"));
-                enabled = true;
+                enable();
                 noSoulSand = false;
                 refilling = false;
                 setZ = false;
@@ -1341,7 +1366,7 @@ public class BuildMod {
         if(Keyboard.isKeyDown(Keyboard.KEY_K)){
             if(!enabled) {
                 mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Buying Netherwart)"));
-                enabled = true;
+                enable();
                 noSoulSand = false;
                 refilling = false;
                 setZ = false;
@@ -1369,6 +1394,14 @@ public class BuildMod {
         }
     }
 
+    void enable(){
+        if(corner1x != 0 && corner1z != 0 && corner2x != 0 && corner2z != 0)
+        enabled = true;
+        else
+            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
+                    "[Build Helper] : Set the corners!"));
+
+    }
 
 
 
