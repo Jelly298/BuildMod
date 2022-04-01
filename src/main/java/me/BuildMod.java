@@ -136,6 +136,7 @@ public class BuildMod {
     public void onTickPlayer(TickEvent.ClientTickEvent e) {
         //0- builder's wand 1-> inf-dirt 2-> pouch 3 ->  shovel 4 - 7 ->soul sand
         if (mc.thePlayer != null && mc.theWorld != null && enabled) {
+            System.out.println(Utils.hasPlayerNearby());
 
             blockunderfeet = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock();
             blockin = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock();
@@ -551,14 +552,14 @@ public class BuildMod {
             if(enabled) {
 
                 try { //-2 -69
-                    rotateTo(90);
+                    rotateTo(90, false);
                     Thread.sleep(3000);
                     process1 = true;
                     while (process1) {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posX == -11) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(0);
+                            rotateTo(0, false);
                             Thread.sleep(3000);
                             process1 = false;
                             process2 = true;
@@ -568,7 +569,7 @@ public class BuildMod {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posZ == -47) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(90);
+                            rotateTo(90, true);
                             Thread.sleep(3000);
                             process2 = false;
                             process3 = true;
@@ -578,7 +579,7 @@ public class BuildMod {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posX == -50) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(0);
+                            rotateTo(0, false);
                             Thread.sleep(3000);
                             process3 = false;
                             process4 = true;
@@ -589,7 +590,6 @@ public class BuildMod {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posZ == -29) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(0);
                             Thread.sleep(3000);
                             process4 = false;
                             process5 = true;
@@ -1225,7 +1225,7 @@ public class BuildMod {
                 (Minecraft.getMinecraft().thePlayer.rotationYaw < 360f ? 360 - (-Minecraft.getMinecraft().thePlayer.rotationYaw % 360)  :  360 + Minecraft.getMinecraft().thePlayer.rotationYaw);
     }
 
-    public static void rotateTo(final int rotation360){
+    public static void rotateTo(final int rotation360, final boolean clockwise){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -1235,7 +1235,10 @@ public class BuildMod {
                         Minecraft.getMinecraft().thePlayer.rotationYaw = (int)(Minecraft.getMinecraft().thePlayer.rotationYaw + (rotation360 - get360RotationYaw()));
                         break;
                     }
-                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.5f;
+                    if(clockwise)
+                        Minecraft.getMinecraft().thePlayer.rotationYaw += 0.5f;
+                    else
+                        Minecraft.getMinecraft().thePlayer.rotationYaw -= 0.5f;
                     try {
                         Thread.sleep(2);
                     } catch (Exception e) {

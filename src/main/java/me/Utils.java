@@ -12,7 +12,7 @@ public class Utils {
     public static boolean hasPlayerNearby()
     {
         for(Entity entity : Minecraft.getMinecraft().theWorld.getLoadedEntityList()){
-            if(entity instanceof EntityPlayer){
+            if(entity instanceof EntityPlayer && !entity.equals(Minecraft.getMinecraft().thePlayer)){
                 if(Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity) < 0.5f)
                     return true;
             }
