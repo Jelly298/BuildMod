@@ -135,8 +135,10 @@ public class BuildMod {
     @SubscribeEvent
     public void onTickPlayer(TickEvent.ClientTickEvent e) {
         //0- builder's wand 1-> inf-dirt 2-> pouch 3 ->  shovel 4 - 7 ->soul sand
+
         if (mc.thePlayer != null && mc.theWorld != null && enabled) {
-            System.out.println(Utils.hasPlayerNearby());
+
+
 
             blockunderfeet = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock();
             blockin = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock();
@@ -988,7 +990,7 @@ public class BuildMod {
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Toggling baritone"));
             setFocus();
             process = "Buying dirt";
-            process1 = true;
+            ScheduleRunnable(Baritone, 1, TimeUnit.SECONDS);
         }
     };
 
@@ -1138,7 +1140,7 @@ public class BuildMod {
 
 
     void setrot(int targetRotationYaw){
-        mc.thePlayer.rotationYaw = mc.thePlayer.rotationYaw - mc.thePlayer.rotationYaw % 360 + targetRotationYaw;
+        Utils.hardRotate(targetRotationYaw);
     }
     void setpitch(int targetPitch){
         mc.thePlayer.rotationPitch = targetPitch;
