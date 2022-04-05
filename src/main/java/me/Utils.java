@@ -8,6 +8,8 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 
+import java.util.Random;
+
 public class Utils {
     public static boolean hasPlayerNearby()
     {
@@ -95,7 +97,7 @@ public class Utils {
 
     }
 
-    public static void hardRotate(float yaw) {
+    public static void hardRotateTo(float yaw) {
         Minecraft mc = Minecraft.getMinecraft();
         if(Math.abs(mc.thePlayer.rotationYaw - yaw) < 0.2f) {
             mc.thePlayer.rotationYaw = yaw;
@@ -108,6 +110,68 @@ public class Utils {
             mc.thePlayer.rotationYaw += 0.1f;
 
         }
+    }
+
+    public static float get360RotationYaw(){
+        return Minecraft.getMinecraft().thePlayer.rotationYaw > 0?
+                (Minecraft.getMinecraft().thePlayer.rotationYaw % 360) :
+                (Minecraft.getMinecraft().thePlayer.rotationYaw < 360f ? 360 - (-Minecraft.getMinecraft().thePlayer.rotationYaw % 360)  :  360 + Minecraft.getMinecraft().thePlayer.rotationYaw);
+    }
+
+    public static void smoothRotateTo(final int rotation360, final boolean clockwise){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                while (get360RotationYaw() != rotation360) {
+                    if(Math.abs(get360RotationYaw() - rotation360) < 1f) {
+                        if(clockwise)
+                            Minecraft.getMinecraft().thePlayer.rotationYaw = Math.round(Minecraft.getMinecraft().thePlayer.rotationYaw + Math.abs(get360RotationYaw() - rotation360));
+                        else
+                            Minecraft.getMinecraft().thePlayer.rotationYaw = Math.round(Minecraft.getMinecraft().thePlayer.rotationYaw - Math.abs(get360RotationYaw() - rotation360));
+                        return;
+                    }
+                    if(clockwise)
+                        Minecraft.getMinecraft().thePlayer.rotationYaw += 0.3f + nextInt(3)/10.0f;
+                    else
+                        Minecraft.getMinecraft().thePlayer.rotationYaw -= 0.3f + nextInt(3)/10.0f;
+
+                    try {
+                        Thread.sleep(1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+    }
+    public static void smoothRotateClockwise(final int rotationClockwise360){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                int targetYaw = (Math.round(get360RotationYaw()) + rotationClockwise360) % 360;
+                while (get360RotationYaw() != targetYaw) {
+                    if(Math.abs(get360RotationYaw() - targetYaw) < 1f) {
+                        Minecraft.getMinecraft().thePlayer.rotationYaw = Math.round(Minecraft.getMinecraft().thePlayer.rotationYaw + Math.abs(get360RotationYaw() - targetYaw));
+                        return;
+                    }
+                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.3f + nextInt(3)/10.0f;
+                    try {
+                        Thread.sleep(1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
+
+    }
+    public static int nextInt(int upperbound){
+        Random r = new Random();
+        return r.nextInt(upperbound);
     }
 
 }

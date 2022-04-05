@@ -138,8 +138,6 @@ public class BuildMod {
 
         if (mc.thePlayer != null && mc.theWorld != null && enabled) {
 
-
-
             blockunderfeet = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock();
             blockin = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock();
             double dx = mc.thePlayer.posX - mc.thePlayer.lastTickPosX;
@@ -189,42 +187,6 @@ public class BuildMod {
                     ScheduleRunnable(WarpHub, 1500, TimeUnit.MILLISECONDS);
                 }
             }
-            /*if (process1) {
-                setrot(90);
-                setKeyBindState(keyBindForward, true);
-                if ((int) mc.thePlayer.posX == -11) {
-                    process1 = false;
-                    process2 = true;
-                }
-            } else if (process2) {
-                setrot(0);
-                setKeyBindState(keyBindForward, true);
-                if ((int) mc.thePlayer.posZ == -47) {
-                    process2 = false;
-                    process3 = true;
-                }
-            } else if (process3) {
-                setrot(90);
-                setKeyBindState(keyBindForward, true);
-                if ((int) mc.thePlayer.posX == -50) {
-                    process3 = false;
-                    process4 = true;
-                }
-            } else if (process4) {
-                setrot(0);
-                setKeyBindState(keyBindForward, true);
-                if ((int) mc.thePlayer.posZ == -29) {
-                    process4 = false;
-                    process5 = true;
-                }
-
-            } else if (process5) {
-                setrot(0);
-                setKeyBindState(keyBindForward, false);
-                ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
-                process5 = false;
-            }*/
-
 
             if (placeSoulSandBlock1) {
                 process = "Placing Soul Sand (1)";
@@ -552,16 +514,17 @@ public class BuildMod {
         @Override
         public void run() {
             if(enabled) {
+                resetKeyBindState();
 
                 try { //-2 -69
-                    rotateTo(90, false);
+                    Utils.smoothRotateTo(90, false);
                     Thread.sleep(3000);
                     process1 = true;
                     while (process1) {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posX == -11) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(0, false);
+                            Utils.smoothRotateTo(0, false);
                             Thread.sleep(3000);
                             process1 = false;
                             process2 = true;
@@ -571,7 +534,7 @@ public class BuildMod {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posZ == -47) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(90, true);
+                            Utils.smoothRotateTo(90, true);
                             Thread.sleep(3000);
                             process2 = false;
                             process3 = true;
@@ -581,7 +544,7 @@ public class BuildMod {
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posX == -50) {
                             setKeyBindState(keyBindForward, false);
-                            rotateTo(0, false);
+                            Utils.smoothRotateTo(0, false);
                             Thread.sleep(3000);
                             process3 = false;
                             process4 = true;
@@ -1140,7 +1103,7 @@ public class BuildMod {
 
 
     void setrot(int targetRotationYaw){
-        Utils.hardRotate(targetRotationYaw);
+        Utils.hardRotateTo(targetRotationYaw);
     }
     void setpitch(int targetPitch){
         mc.thePlayer.rotationPitch = targetPitch;
@@ -1227,53 +1190,6 @@ public class BuildMod {
                 (Minecraft.getMinecraft().thePlayer.rotationYaw < 360f ? 360 - (-Minecraft.getMinecraft().thePlayer.rotationYaw % 360)  :  360 + Minecraft.getMinecraft().thePlayer.rotationYaw);
     }
 
-    public static void rotateTo(final int rotation360, final boolean clockwise){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                while (get360RotationYaw() != rotation360) {
-                    if(Math.abs(rotation360 - get360RotationYaw()) < 2) {
-                        Minecraft.getMinecraft().thePlayer.rotationYaw = (int)(Minecraft.getMinecraft().thePlayer.rotationYaw + (rotation360 - get360RotationYaw()));
-                        break;
-                    }
-                    if(clockwise)
-                        Minecraft.getMinecraft().thePlayer.rotationYaw += 0.5f;
-                    else
-                        Minecraft.getMinecraft().thePlayer.rotationYaw -= 0.5f;
-                    try {
-                        Thread.sleep(2);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
-
-    }
-    public static void rotateClockwise(final int rotationClockwise){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int initialYaw = (int)Minecraft.getMinecraft().thePlayer.rotationYaw;
-                while (Minecraft.getMinecraft().thePlayer.rotationYaw != initialYaw + rotationClockwise) {
-                    if(Math.abs(Minecraft.getMinecraft().thePlayer.rotationYaw - initialYaw + rotationClockwise) < 2) {
-                        Minecraft.getMinecraft().thePlayer.rotationYaw = (int)(Minecraft.getMinecraft().thePlayer.rotationYaw + rotationClockwise);
-                        break;
-                    }
-
-                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.5f;
-                    try {
-                        Thread.sleep(2);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        }).start();
-
-    }
 
     void stop(){
         mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Disabling script"));
