@@ -132,9 +132,9 @@ public class Utils {
                         return;
                     }
                     if(clockwise)
-                        Minecraft.getMinecraft().thePlayer.rotationYaw += 0.3f + nextInt(3)/10.0f;
+                        Minecraft.getMinecraft().thePlayer.rotationYaw += 0.2f + nextInt(3)/10.0f;
                     else
-                        Minecraft.getMinecraft().thePlayer.rotationYaw -= 0.3f + nextInt(3)/10.0f;
+                        Minecraft.getMinecraft().thePlayer.rotationYaw -= 0.2f + nextInt(3)/10.0f;
 
                     try {
                         Thread.sleep(1);
@@ -157,7 +157,7 @@ public class Utils {
                         Minecraft.getMinecraft().thePlayer.rotationYaw = Math.round(Minecraft.getMinecraft().thePlayer.rotationYaw + Math.abs(get360RotationYaw() - targetYaw));
                         return;
                     }
-                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.3f + nextInt(3)/10.0f;
+                    Minecraft.getMinecraft().thePlayer.rotationYaw += 0.2f + nextInt(3)/10.0f;
                     try {
                         Thread.sleep(1);
                     } catch (Exception e) {
@@ -173,5 +173,12 @@ public class Utils {
         Random r = new Random();
         return r.nextInt(upperbound);
     }
+    public static float getActualRotationYaw(){ //f3
+        Minecraft mc = Minecraft.getMinecraft();
+        return mc.thePlayer.rotationYaw > 0?
+                (mc.thePlayer.rotationYaw % 360 > 180 ? -(180 - (mc.thePlayer.rotationYaw % 360 - 180)) :  mc.thePlayer.rotationYaw % 360  ) :
+                (-mc.thePlayer.rotationYaw % 360 > 180 ? (180 - (-mc.thePlayer.rotationYaw % 360 - 180))  :  -(-mc.thePlayer.rotationYaw % 360));
+    }
+
 
 }

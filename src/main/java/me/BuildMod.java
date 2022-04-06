@@ -43,11 +43,11 @@ public class BuildMod {
     public static final String VERSION = "1.0";
 
     boolean enabled;
-    boolean process1 = false;
-    boolean process2 = false;
-    boolean process3 = false;
-    boolean process4 = false;
-    boolean process5 = false;
+    volatile boolean process1 = false;
+    volatile boolean process2 = false;
+    volatile boolean process3 = false;
+    volatile boolean process4 = false;
+    volatile boolean process5 = false;
     boolean dig1 = false;
     boolean lockdig1 = false;
     boolean dig2 = false;
@@ -121,12 +121,18 @@ public class BuildMod {
     public void renderText(RenderGameOverlayEvent e) {
         if (e.type == RenderGameOverlayEvent.ElementType.TEXT) {
 
-            Gui.drawRect(4, 30, 122, 64, 0x70000000);
-            mc.fontRendererObj.drawString(EnumChatFormatting.BLUE + "--- information ---", 12, 32, -1);
+            Gui.drawRect(4, 28, 140, 84, 0x70000000);
+            mc.fontRendererObj.drawString(EnumChatFormatting.BLUE + "--- INFORMATION ---", 16, 32, -1);
             mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "Corner 1 : "
                     + EnumChatFormatting.GRAY + "X : " + corner1x + "  Z : " + corner1z, 8, 42, -1);
             mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "Corner 2 : "
                     + EnumChatFormatting.GRAY + "X : " + corner2x + "  Z : " + corner2z, 8, 52, -1);
+            mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "X/Y/Z : "
+                    + EnumChatFormatting.GRAY + (int)mc.thePlayer.posX + "/" + (int)mc.thePlayer.posY + "/" + (int)mc.thePlayer.posZ, 8, 62, -1);
+            mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "Pitch/Yaw : "
+                    + EnumChatFormatting.GRAY + (int)Utils.getActualRotationYaw() + "/" + (int)mc.thePlayer.rotationPitch, 8, 72, -1);
+
+
 
         }
     }
@@ -551,7 +557,6 @@ public class BuildMod {
                         }
                     }
                     while (process4) {
-                        setrot(0);
                         setKeyBindState(keyBindForward, true);
                         if ((int) mc.thePlayer.posZ == -29) {
                             setKeyBindState(keyBindForward, false);
@@ -563,7 +568,6 @@ public class BuildMod {
                     }
                     while (process5) {
                         setKeyBindState(keyBindForward, false);
-                        setrot(0);
                         if(!Utils.hasPlayerNearby()) {
                             ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
                             process5 = false;
@@ -980,6 +984,7 @@ public class BuildMod {
                         }
                     }
 
+
                 } catch (Exception e) {
 
                 }
@@ -1118,11 +1123,6 @@ public class BuildMod {
         moved = true;
         KeyBinding.setKeyBindState(keyBindBackward, false);
         ScheduleRunnable(MoveBack, 500, TimeUnit.MILLISECONDS);
-    }
-    float getActualRotationYaw(){ //f3
-        return mc.thePlayer.rotationYaw > 0?
-                (mc.thePlayer.rotationYaw % 360 > 180 ? -(180 - (mc.thePlayer.rotationYaw % 360 - 180)) :  mc.thePlayer.rotationYaw % 360  ) :
-                (-mc.thePlayer.rotationYaw % 360 > 180 ? (180 - (-mc.thePlayer.rotationYaw % 360 - 180))  :  -(-mc.thePlayer.rotationYaw % 360));
     }
 
     void clickWindow(int windowID, int slotID, int mouseButtonClicked, int mode){
