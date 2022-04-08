@@ -996,13 +996,17 @@ public class BuildMod {
         public void run() {
             if(enabled) {
 
-                clickWindow(mc.thePlayer.openContainer.windowId, 24, 0, 0);
+                try {
+                    clickWindow(mc.thePlayer.openContainer.windowId, 24, 0, 0);
 
-                if (mc.thePlayer.inventory.getFirstEmptyStack() == -1) {
-                    mc.thePlayer.closeScreen();
-                    ScheduleRunnable(openBuilderWand, 1, TimeUnit.SECONDS);
-                } else {
-                    ScheduleRunnable(buySoulSand, 700, TimeUnit.MILLISECONDS);
+                    if (mc.thePlayer.inventory.getFirstEmptyStack() == -1) {
+                        mc.thePlayer.closeScreen();
+                        ScheduleRunnable(openBuilderWand, 1, TimeUnit.SECONDS);
+                    } else {
+                        ScheduleRunnable(buySoulSand, 700, TimeUnit.MILLISECONDS);
+                    }
+                }catch(Exception e){
+
                 }
 
             }
@@ -1033,27 +1037,29 @@ public class BuildMod {
             if(enabled) {
                 if (Utils.hasSoulSandInInv()) {
 
-                    clickWindow(mc.thePlayer.openContainer.windowId, 45 + Utils.getFirstSlotWithSoulSand(), 0, 1);
+                    try {
+                        clickWindow(mc.thePlayer.openContainer.windowId, 45 + Utils.getFirstSlotWithSoulSand(), 0, 1);
 
-                    if (Utils.hasSoulSandInInv()) {
-                        if (!Utils.isContainerFull())
-                            ScheduleRunnable(PlaceSoulSandInWand, 500, TimeUnit.MILLISECONDS);
-                        else {
-                            mc.thePlayer.closeScreen();
-                            mc.thePlayer.sendChatMessage("/warp home");
-                            if (refilling) {
-                                ScheduleRunnable(backToIslandPrep, 3, TimeUnit.SECONDS);
-                            } else {
-                                ScheduleRunnable(prepPlaceBlock, 3, TimeUnit.SECONDS);
+                        if (Utils.hasSoulSandInInv()) {
+                            if (!Utils.isContainerFull())
+                                ScheduleRunnable(PlaceSoulSandInWand, 500, TimeUnit.MILLISECONDS);
+                            else {
+                                mc.thePlayer.closeScreen();
+                                mc.thePlayer.sendChatMessage("/warp home");
+                                if (refilling) {
+                                    ScheduleRunnable(backToIslandPrep, 3, TimeUnit.SECONDS);
+                                } else {
+                                    ScheduleRunnable(prepPlaceBlock, 3, TimeUnit.SECONDS);
+                                }
+
                             }
-
+                        } else {
+                            mc.thePlayer.closeScreen();
+                            ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
                         }
-                    } else {
-                        mc.thePlayer.closeScreen();
-                        ScheduleRunnable(openBuilderShop, 1, TimeUnit.SECONDS);
-                    }
-                } else {
+                    }catch(Exception e){
 
+                    }
                 }
             }
         }
@@ -1100,7 +1106,7 @@ public class BuildMod {
                     placeSoulSandBlock1 = true;
                     placeSoulSandBlock2 = false;
                 } catch (Exception e) {
-                    e.printStackTrace();
+
                 }
             }
         }
@@ -1125,14 +1131,15 @@ public class BuildMod {
         ScheduleRunnable(MoveBack, 500, TimeUnit.MILLISECONDS);
     }
 
-    void clickWindow(int windowID, int slotID, int mouseButtonClicked, int mode){
+    void clickWindow(int windowID, int slotID, int mouseButtonClicked, int mode) throws Exception{
        if(mc.thePlayer.openContainer instanceof ContainerChest || mc.currentScreen instanceof  GuiInventory)
            mc.playerController.windowClick(windowID, slotID, mouseButtonClicked, mode, mc.thePlayer);
        else {
            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
                    "[Build Helper] : Didn't open window! This shouldn't happen and the script has been disabled. Please immediately report to the developer."));
-
            enabled = false;
+           throw new Exception();
+
        }
     }
     void changeSoulSandPlaceProcess(){

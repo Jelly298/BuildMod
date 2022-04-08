@@ -173,6 +173,10 @@ public class Utils {
         Random r = new Random();
         return r.nextInt(upperbound);
     }
+    public static boolean shouldRotateClockwise(int targetYaw360, int initialYaw360){
+         return targetYaw360 - initialYaw360 > 0 ?
+                 targetYaw360 - initialYaw360 <= 180 : targetYaw360 - initialYaw360 < -180;
+    }
     public static float getActualRotationYaw(){ //f3
         Minecraft mc = Minecraft.getMinecraft();
         return mc.thePlayer.rotationYaw > 0?
