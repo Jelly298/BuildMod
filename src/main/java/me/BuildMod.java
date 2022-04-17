@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
+import net.minecraft.client.gui.inventory.GuiContainerCreative;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.lwjgl.input.Keyboard;
+import scala.tools.nsc.Global;
 
 import java.lang.reflect.Field;
 import java.sql.Time;
@@ -66,13 +68,7 @@ public class BuildMod {
     boolean refilling = false;
     boolean setZ = false;
     boolean setX = false;
-    boolean moved = false;
-    boolean changedX = false;
-    boolean firstBlock = false; //place soul sand 2 first block
-    boolean reached = false; // reached place soul sand 1 end
-    boolean placedFirstBlock = false; // placed soul sand 2 first block
-    boolean positiveX = false; // Place soul sand 1 whether player posX is +ve
-    boolean positiveZ = false;
+    boolean firstBlock = true; //place soul sand 2 first block
     boolean leftSide = false; // whether player ended digging on left side
     boolean sameSide = false;
     boolean placeNWGoingLeft = false;
@@ -92,6 +88,9 @@ public class BuildMod {
     int lengthX = 0;
     int lengthZ = 0;
     int digAngle = 0;
+
+    double initialX = 0;
+    double initialZ = 0;
 
 
     MouseHelper mouseHelper = new MouseHelper();
@@ -129,8 +128,8 @@ public class BuildMod {
                     + EnumChatFormatting.GRAY + "X : " + corner2x + "  Z : " + corner2z, 8, 52, -1);
             mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "X/Y/Z : "
                     + EnumChatFormatting.GRAY + (int)mc.thePlayer.posX + "/" + (int)mc.thePlayer.posY + "/" + (int)mc.thePlayer.posZ, 8, 62, -1);
-            mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "Pitch/Yaw : "
-                    + EnumChatFormatting.GRAY + (int)Utils.getActualRotationYaw() + "/" + (int)mc.thePlayer.rotationPitch, 8, 72, -1);
+            mc.fontRendererObj.drawString(EnumChatFormatting.GREEN + "Pitch/Yaw/MCYaw : "
+                    + EnumChatFormatting.GRAY + (int)Utils.getActualRotationYaw() + "/" + (int)mc.thePlayer.rotationPitch + "/" + (int)Minecraft.getMinecraft().thePlayer.rotationYaw, 8, 72, -1);
 
 
 
@@ -201,11 +200,15 @@ public class BuildMod {
                 else
                     setrot(90);
 
-                setpitch(60);
+                if(firstBlock)
+                    setpitch(60);
+                else
+                    setpitch(30);
+
                 setKeyBindState(keyBindSneak, true);
 
                 if (!setX) {
-                    originalX = (int) mc.thePlayer.posX;
+                    initialX = mc.thePlayer.posX;
                     setX = true;
                 }
 
@@ -216,155 +219,76 @@ public class BuildMod {
                             mc.thePlayer.inventory.currentItem + 1 : mc.thePlayer.inventory.currentItem);
                 }
 
-                // 1. separate corner 2x - corner 1x
-                // 2. filter 0 case
-                // 3. separate posX +ve or -ve
-                if (corner2x - corner1x > 0) {
+                setKeyBindState(keyBindBackward, true);
+                if(Math.round(mc.thePlayer.posX) == corner1x)
+                    changeSoulSandPlaceProcess();
 
-                    if (originalX == 0 && positiveX) {
-                        if (mc.thePlayer.posX - originalX < -0.5f && !moved && !reached)
-                            moveback();
-                        else if (mc.thePlayer.posX - originalX > -0.5f && !reached)
-                            setKeyBindState(keyBindBackward, true);
-
-                    } else {
-                        if (mc.thePlayer.posX < 0) {
-                            if (mc.thePlayer.posX - originalX + 0.5f < -1 && !moved && !reached)
-                                moveback();
-                            else if (mc.thePlayer.posX - originalX + 0.5f > -1 && !reached)
-                                setKeyBindState(keyBindBackward, true);
-
-                        } else {
-                            if (mc.thePlayer.posX - originalX - 0.5f < -1 && !moved && !reached)
-                                moveback();
-                            else if (mc.thePlayer.posX - originalX - 0.5f > -1 && !reached)
-                                setKeyBindState(keyBindBackward, true);
-
-                        }
+                if(Math.abs(initialX - mc.thePlayer.posX) > 1){
+                    KeyBinding.onTick(keyBindUseItem);
+                    setX = false;
+                    if(firstBlock){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(60);
+                                    firstBlock = false;
+                                }catch(Exception e){
+                                }
+                            }
+                        }).start();
                     }
-                } else {
-                    if (originalX == 0 && !positiveX) {
-                        if (mc.thePlayer.posX - originalX > 0.5f && !moved && !reached)
-                            moveback();
-                        else if (mc.thePlayer.posX - originalX < 0.5f && !reached)
-                            KeyBinding.setKeyBindState(keyBindBackward, true);
 
-                    } else {
-
-                        if (mc.thePlayer.posX < 0) {
-                            if (mc.thePlayer.posX - originalX + 0.5f > 1 && !moved && !reached)
-                                moveback();
-                            else if (mc.thePlayer.posX - originalX + 0.5f < 1 && !reached)
-                                KeyBinding.setKeyBindState(keyBindBackward, true);
-
-                        } else {
-                            if (mc.thePlayer.posX - originalX - 0.5f > 1 && !moved && !reached)
-                                moveback();
-                            else if (mc.thePlayer.posX - originalX - 0.5f < 1 && !reached)
-                                KeyBinding.setKeyBindState(keyBindBackward, true);
-
-                        }
-                    }
-                }
-                if (corner2x - corner1x > 0) {
-                    if ((int) (mc.thePlayer.posX + 0.5f) == corner1x && !changedX)
-                        changeSoulSandPlaceProcess();
-                } else {
-                    if ((int) (mc.thePlayer.posX - 0.5f) == corner1x && !changedX)
-                        changeSoulSandPlaceProcess();
                 }
 
             } else if (placeSoulSandBlock2) {
+                process = "Placing Soul Sand (2)";
 
                 if (corner2z - corner1z > 0)
                     setrot(0);
                 else
                     setrot(180);
-                process = "Placing Soul Sand (2)";
+
                 if (firstBlock)
                     setpitch(60);
                 else
                     setpitch(34);
 
-                setKeyBindState(keyBindSneak, true);
                 if (!firstBlock)
                     setHotbarIndex(0);
 
                 if (!setZ) {
-                    originalZ = (int) mc.thePlayer.posZ;
+                    initialZ = mc.thePlayer.posZ;
                     setZ = true;
                 }
+                setKeyBindState(keyBindSneak, true);
+                setKeyBindState(keyBindBackward, true);
+                if(Math.round(mc.thePlayer.posZ) == corner1z)
+                    endSoulSandPlaceProcess();
 
-                if (corner2z - corner1z > 0) {
-                    if (originalZ == 0 && positiveZ) {
-                        if (mc.thePlayer.posZ - originalZ < -0.5f && !moved)
-                            moveback();
-                        else if (mc.thePlayer.posZ - originalZ > -0.5f)
-                            setKeyBindState(keyBindBackward, true);
-
-                    } else {
-                        if (mc.thePlayer.posZ < 0) {
-                            if (mc.thePlayer.posZ - originalZ + 0.5f < -1 && !moved) {
-                                if (!placedFirstBlock) {
-                                    KeyBinding.onTick(keyBindUseItem);
-                                    placedFirstBlock = true;
+                if(Math.abs(initialZ - mc.thePlayer.posZ) > 1){
+                    KeyBinding.onTick(keyBindUseItem);
+                    setZ = false;
+                    if(firstBlock){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(60);
+                                    firstBlock = false;
+                                }catch(Exception e){
                                 }
-                                moveback();
-                            } else if (mc.thePlayer.posZ - originalZ + 0.5f > -1)
-                                KeyBinding.setKeyBindState(keyBindBackward, true);
-
-                        } else {
-                            if (mc.thePlayer.posZ - originalZ - 0.5f < -1 && !moved) {
-                                if (!placedFirstBlock) {
-                                    KeyBinding.onTick(keyBindUseItem);
-                                    placedFirstBlock = true;
-                                }
-                                moveback();
-                            } else if (mc.thePlayer.posZ - originalZ - 0.5f > -1)
-                                setKeyBindState(keyBindBackward, true);
-                        }
+                            }
+                        }).start();
                     }
-                } else {
 
-                    if (originalZ == 0 && !positiveZ) {
-                        if (mc.thePlayer.posZ - originalZ > 0.5f && !moved)
-                            moveback();
-                        else if (mc.thePlayer.posZ - originalZ < 0.5f)
-                            setKeyBindState(keyBindBackward, true);
-                    } else {
-                        if (mc.thePlayer.posZ < 0) {
-                            if (mc.thePlayer.posZ - originalZ + 0.5f > 1 && !moved) {
-                                if (!placedFirstBlock) {
-                                    KeyBinding.onTick(keyBindUseItem);
-                                    placedFirstBlock = true;
-                                }
-                                moveback();
-                            } else if (mc.thePlayer.posZ - originalZ + 0.5f < 1)
-                                setKeyBindState(keyBindBackward, true);
-                        } else {
-                            if (mc.thePlayer.posZ - originalZ - 0.5f > 1 && !moved) {
-                                if (!placedFirstBlock) {
-                                    KeyBinding.onTick(keyBindUseItem);
-                                    placedFirstBlock = true;
-                                }
-                                moveback();
-                            } else if (mc.thePlayer.posZ - originalZ - 0.5f < 1)
-                                KeyBinding.setKeyBindState(keyBindBackward, true);
-
-                        }
-                    }
                 }
 
-                if (corner2z - corner1z > 0) {
-                    if ((int) (mc.thePlayer.posZ + 0.5f) == corner1z)
-                        endSoulSandPlaceProcess();
-                } else {
-                    if ((int) (mc.thePlayer.posZ - 0.5f) == corner1z)
-                        endSoulSandPlaceProcess();
-                }
+
 
             } else if (noSoulSand) {
                 process = "Detected no blocks";
+                Utils.addCustomLog("Detected no blocks to place");
                 setKeyBindState(keyBindBackward, false);
                 setKeyBindState(keyBindSneak, false);
                 setKeyBindState(keyBindUseItem, false);
@@ -760,7 +684,7 @@ public class BuildMod {
 
             try {
                 setrot(digAngle);
-                KeyBinding.setKeyBindState(keyBindForward, true);
+                setKeyBindState(keyBindForward, true);
                 mc.thePlayer.rotationPitch = 45;
 
                 while(!(Math.abs(corner2x - corner1x) - 2 <= Math.abs(originalX - (int) mc.thePlayer.posX))) {
@@ -855,8 +779,6 @@ public class BuildMod {
     Runnable clearInventory = new Runnable() {
         @Override
         public void run() {
-
-
             try {
                 setHotbarIndex(8);
                 Thread.sleep(100);
@@ -877,49 +799,14 @@ public class BuildMod {
             }
         }
     };
-    Runnable ChangeSoulSandPlaceProcess = new Runnable() {
-        @Override
-        public void run() {
-
-            try {
-                Thread.sleep(500);
-                firstBlock = true;
-                placeSoulSandBlock1 = false;
-                placeSoulSandBlock2 = true;
-
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-    Runnable MoveBack = new Runnable() {
-        @Override
-        public void run() {
-
-            try {
-                if(!firstBlock)
-                KeyBinding.onTick(keyBindUseItem);
-
-                positiveX = mc.thePlayer.posX > 0;
-                positiveZ = mc.thePlayer.posZ > 0;
-                firstBlock = false;
-                setZ = false;
-                setX = false;
-                moved = false;
-
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     Runnable backToIslandPrep = new Runnable() {
         @Override
         public void run() {
             try {
-                KeyBinding.setKeyBindState(keyBindSneak, true);
+                setKeyBindState(keyBindSneak, true);
                 Thread.sleep(1000);
-                KeyBinding.setKeyBindState(keyBindSneak, false);
+                setKeyBindState(keyBindSneak, false);
                 KeyBinding.onTick(keyBindUseItem);
                 Thread.sleep(500);
                 placeSoulSandBlock2 = true;
@@ -954,9 +841,9 @@ public class BuildMod {
     Runnable toggleBaritone = new Runnable() {
         @Override
         public void run() {
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Toggling baritone"));
+            Utils.addCustomLog("Toggling baritone");
             setFocus();
-            process = "Buying dirt";
+            process = "Buying soul sand";
             ScheduleRunnable(Baritone, 1, TimeUnit.SECONDS);
         }
     };
@@ -1044,6 +931,7 @@ public class BuildMod {
                             if (!Utils.isContainerFull())
                                 ScheduleRunnable(PlaceSoulSandInWand, 500, TimeUnit.MILLISECONDS);
                             else {
+                                Utils.addCustomLog("Builder's wand is full. Warping home");
                                 mc.thePlayer.closeScreen();
                                 mc.thePlayer.sendChatMessage("/warp home");
                                 if (refilling) {
@@ -1073,7 +961,7 @@ public class BuildMod {
 
                 try {
                     setFocus();
-                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Preparing to place soul sand"));
+                    Utils.addCustomLog("Preparing to place soul sand");
                     mc.thePlayer.inventory.currentItem = 0;
                     KeyBinding.onTick(keyBindAttack);
 
@@ -1092,10 +980,10 @@ public class BuildMod {
                     mc.thePlayer.closeScreen();
 
 
-                    KeyBinding.setKeyBindState(keyBindSneak, true);
+                    setKeyBindState(keyBindSneak, true);
                     Thread.sleep(1000);
 
-                    KeyBinding.setKeyBindState(keyBindSneak, false);
+                    setKeyBindState(keyBindSneak, false);
 
 
                     mc.thePlayer.inventory.currentItem = 3;
@@ -1114,41 +1002,64 @@ public class BuildMod {
 
 
     void setrot(int targetRotationYaw){
-        Utils.hardRotateTo(targetRotationYaw);
+        Utils.hardRotateYaw(targetRotationYaw);
     }
     void setpitch(int targetPitch){
-        mc.thePlayer.rotationPitch = targetPitch;
+        Utils.hardRotatePitch(targetPitch);
     }
     void setKeyBindState(int keyCode, boolean pressed){
-        KeyBinding.setKeyBindState(keyCode, pressed);
+        if(mc.currentScreen == null)
+            KeyBinding.setKeyBindState(keyCode, pressed);
+        else{
+            Utils.addCustomMessage(EnumChatFormatting.RED + "Attempted to inv walk. Closing GUI and disabling script. If you didn't press any keys, please immediately report to the developer");
+            enabled = false;
+            mc.thePlayer.closeScreen();
+            resetKeyBindState();
+            stop();
+        }
     }
     void setHotbarIndex(int index){
         mc.thePlayer.inventory.currentItem = index;
     }
-    void moveback(){
-        moved = true;
-        KeyBinding.setKeyBindState(keyBindBackward, false);
-        ScheduleRunnable(MoveBack, 500, TimeUnit.MILLISECONDS);
-    }
+
 
     void clickWindow(int windowID, int slotID, int mouseButtonClicked, int mode) throws Exception{
-       if(mc.thePlayer.openContainer instanceof ContainerChest || mc.currentScreen instanceof  GuiInventory)
+
+       if(mc.thePlayer.openContainer instanceof ContainerChest || mc.currentScreen instanceof  GuiInventory) {
            mc.playerController.windowClick(windowID, slotID, mouseButtonClicked, mode, mc.thePlayer);
+           Utils.addCustomLog("Pressing slot : " + slotID);
+           stop();
+       }
        else {
-           mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
-                   "[Build Helper] : Didn't open window! This shouldn't happen and the script has been disabled. Please immediately report to the developer."));
+           Utils.addCustomMessage(EnumChatFormatting.RED + "Didn't open window! This shouldn't happen and the script has been disabled. Please immediately report to the developer.");
+           resetKeyBindState();
            enabled = false;
+           stop();
            throw new Exception();
 
        }
     }
     void changeSoulSandPlaceProcess(){
-        setKeyBindState(keyBindBackward, false);
-        reached = true;
-        changedX = true;
-        ScheduleRunnable(ChangeSoulSandPlaceProcess, 1, TimeUnit.SECONDS);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    KeyBinding.onTick(keyBindUseItem);
+                    setKeyBindState(keyBindBackward, false);
+                    firstBlock = true;
+                    placeSoulSandBlock1 = false;
+                    Thread.sleep(500);
+                    placeSoulSandBlock2 = true;
+                    Utils.addCustomLog("Placing soul sand by builder's wand");
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
      }
      void endSoulSandPlaceProcess(){
+         Utils.addCustomLog("Initializing digging");
          setKeyBindState(keyBindBackward, false);
          placeSoulSandBlock2 = false;
          initializingPath = true;
@@ -1158,6 +1069,7 @@ public class BuildMod {
          setKeyBindState(keyBindLeft, false);
          setKeyBindState(keyBindRight, false);
          setKeyBindState(keyBindSneak, false);
+         Utils.addCustomLog("Starting to dig");
          initializingPath = false;
          digAngle = (corner2z - corner1z > 0) ? 0 : 180;
          dig1 = true;
@@ -1199,7 +1111,7 @@ public class BuildMod {
 
 
     void stop(){
-        mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Disabling script"));
+        Utils.addCustomMessage("Stopping script");
         resetKeyBindState();
         enabled = false;
         process1 = false;
@@ -1221,13 +1133,7 @@ public class BuildMod {
         refilling = false;
         setZ = false;
         setX = false;
-        moved = false;
-        changedX = false;
-        firstBlock = false;
-        reached = false;
-        positiveX = false;
-        positiveZ = false;
-        placedFirstBlock = false;
+        firstBlock = true;
         initializingPath = false;
         lockdig3 = false;
         leftSide = false;
@@ -1250,20 +1156,16 @@ public class BuildMod {
         if(Keyboard.isKeyDown(Keyboard.KEY_F)){
             if(!enabled) {
 
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script"));
-               enable();
-                 noSoulSand = false;
-                 refilling = false;
-                 setZ = false;
-                 moved = false;
-                 placeBlock1 = true;
+                Utils.addCustomMessage("Enabling script");
+                enable();
+                placeBlock1 = true;
             } else {
                 stop();
             }
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_G)){
             if(!enabled) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Buying Soul Sand)"));
+                Utils.addCustomMessage("Enabling script (Activating baritone to buy soul sand)");
                 enable();
                 ScheduleRunnable(Baritone, 1, TimeUnit.SECONDS);
 
@@ -1271,34 +1173,25 @@ public class BuildMod {
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_H)){
             if(!enabled) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Placing Soul Sand 1)"));
+                Utils.addCustomMessage("Enabling script (Placing soul sand by hand)");
                 enable();
-                noSoulSand = false;
-                refilling = false;
-                setZ = false;
-                moved = false;
-                ScheduleRunnable(prepPlaceBlock, 1, TimeUnit.SECONDS);
+                placeSoulSandBlock1 = true;
             }
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_J)){
             if(!enabled) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Digging soul sand)"));
+                Utils.addCustomMessage("Enabling script (Digging soul sand)");
                 enable();
-                noSoulSand = false;
-                refilling = false;
-                setZ = false;
-                moved = false;
                 endSoulSandPlaceProcess();
             }
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_K)){
             if(!enabled) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Enabling script (Buying Netherwart)"));
+                Utils.addCustomMessage("Enabling script (Buying soul sand)");
                 enable();
                 noSoulSand = false;
                 refilling = false;
                 setZ = false;
-                moved = false;
                 startedBuyingNetherwart = false;
                 placingNetherwart = true;
                 buyingNetherwart = true;
@@ -1306,14 +1199,14 @@ public class BuildMod {
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_P)){
             if(setmode == 0) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Set 1st corner"));
+                Utils.addCustomMessage("Set 1st corner");
                 corner1x = (int)mc.thePlayer.posX;
                 corner1y = (int)mc.thePlayer.posY - 1;
                 corner1z = (int)mc.thePlayer.posZ;
                 setmode = 1 - setmode;
             }
             else {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "[Build Helper] : Set 2nd corner"));
+                Utils.addCustomMessage("Set 2nd corner");
                 corner2x = (int)mc.thePlayer.posX;
                 corner2y = (int)mc.thePlayer.posY - 1;
                 corner2z = (int)mc.thePlayer.posZ;
@@ -1324,10 +1217,9 @@ public class BuildMod {
 
     void enable(){
         if(corner1x != 0 && corner1z != 0 && corner2x != 0 && corner2z != 0)
-        enabled = true;
+            enabled = true;
         else
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
-                    "[Build Helper] : Set the corners!"));
+            Utils.addCustomMessage(EnumChatFormatting.AQUA + "Set the corners");
 
     }
 
@@ -1337,12 +1229,12 @@ public class BuildMod {
     @SubscribeEvent
     public void onChatReceived(ClientChatReceivedEvent e){
         if(e.message.getUnformattedText().contains("You don't have that many")){
+            Utils.addCustomLog("Detected no soul sand. Go buying some");
             placeSoulSandBlock2 = false;
             noSoulSand = true;
         }
         if(e.message.getUnformattedText().contains("You have sent a trade request")){
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
-                    "[Build Helper] : Clicked on some other players! The script has been disabled. Please do /warp home and /hub and press G or H."));
+            Utils.addCustomLog("Clicked on some other players! The script has been disabled. Please do /warp home and /hub and press G or H");
             enabled = false;
         }
     }

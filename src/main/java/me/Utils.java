@@ -7,10 +7,41 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
 import java.util.Random;
 
 public class Utils {
+    public static void hardRotateYaw(float yaw) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if(Math.abs(mc.thePlayer.rotationYaw - yaw) < 0.2f) {
+            mc.thePlayer.rotationYaw = yaw;
+            return;
+        }
+        while(mc.thePlayer.rotationYaw > yaw) {
+            mc.thePlayer.rotationYaw -= 0.1f;
+        }
+        while(mc.thePlayer.rotationYaw < yaw) {
+            mc.thePlayer.rotationYaw += 0.1f;
+
+        }
+    }
+    public static void hardRotatePitch(float pitch) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if(Math.abs(mc.thePlayer.rotationPitch - pitch) < 0.2f) {
+            mc.thePlayer.rotationPitch = pitch;
+            return;
+        }
+        while(mc.thePlayer.rotationPitch > pitch) {
+            mc.thePlayer.rotationPitch -= 0.1f;
+        }
+        while(mc.thePlayer.rotationPitch < pitch) {
+            mc.thePlayer.rotationPitch += 0.1f;
+
+        }
+    }
+
     public static boolean hasPlayerNearby()
     {
         for(Entity entity : Minecraft.getMinecraft().theWorld.getLoadedEntityList()){
@@ -97,21 +128,6 @@ public class Utils {
 
     }
 
-    public static void hardRotateTo(float yaw) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if(Math.abs(mc.thePlayer.rotationYaw - yaw) < 0.2f) {
-            mc.thePlayer.rotationYaw = yaw;
-            return;
-        }
-        while(mc.thePlayer.rotationYaw > yaw) {
-            mc.thePlayer.rotationYaw -= 0.1f;
-        }
-        while(mc.thePlayer.rotationYaw < yaw) {
-            mc.thePlayer.rotationYaw += 0.1f;
-
-        }
-    }
-
     public static float get360RotationYaw(){
         return Minecraft.getMinecraft().thePlayer.rotationYaw > 0?
                 (Minecraft.getMinecraft().thePlayer.rotationYaw % 360) :
@@ -182,6 +198,21 @@ public class Utils {
         return mc.thePlayer.rotationYaw > 0?
                 (mc.thePlayer.rotationYaw % 360 > 180 ? -(180 - (mc.thePlayer.rotationYaw % 360 - 180)) :  mc.thePlayer.rotationYaw % 360  ) :
                 (-mc.thePlayer.rotationYaw % 360 > 180 ? (180 - (-mc.thePlayer.rotationYaw % 360 - 180))  :  -(-mc.thePlayer.rotationYaw % 360));
+    }
+    public static void addCustomMessage(String msg){
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
+                "[Build Helper] : " + EnumChatFormatting.GRAY + msg));
+
+    }
+    public static void addCustomMessage(String msg, EnumChatFormatting color){
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA +
+                "[Build Helper] : " + color + msg));
+
+    }
+    public static void addCustomLog(String log){
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.BLUE +
+                "[Build Helper Log] : " + EnumChatFormatting.GRAY + log));
+
     }
 
 
