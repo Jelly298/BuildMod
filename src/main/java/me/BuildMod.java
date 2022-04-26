@@ -206,11 +206,7 @@ public class BuildMod {
                     setpitch(30);
 
                 setKeyBindState(keyBindSneak, true);
-
-                if (!setX) {
-                    initialX = mc.thePlayer.posX;
-                    setX = true;
-                }
+                setKeyBindState(keyBindUseItem, true);
 
                 if (mc.thePlayer.inventory.currentItem <= 3) setHotbarIndex(4);
 
@@ -222,24 +218,6 @@ public class BuildMod {
                 setKeyBindState(keyBindBackward, true);
                 if(Math.round(mc.thePlayer.posX) == corner1x)
                     changeSoulSandPlaceProcess();
-
-                if(Math.abs(initialX - mc.thePlayer.posX) > 1){
-                    KeyBinding.onTick(keyBindUseItem);
-                    setX = false;
-                    if(firstBlock){
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(60);
-                                    firstBlock = false;
-                                }catch(Exception e){
-                                }
-                            }
-                        }).start();
-                    }
-
-                }
 
             } else if (placeSoulSandBlock2) {
                 process = "Placing Soul Sand (2)";
@@ -257,33 +235,11 @@ public class BuildMod {
                 if (!firstBlock)
                     setHotbarIndex(0);
 
-                if (!setZ) {
-                    initialZ = mc.thePlayer.posZ;
-                    setZ = true;
-                }
                 setKeyBindState(keyBindSneak, true);
                 setKeyBindState(keyBindBackward, true);
+                setKeyBindState(keyBindUseItem, true);
                 if(Math.round(mc.thePlayer.posZ) == corner1z)
                     endSoulSandPlaceProcess();
-
-                if(Math.abs(initialZ - mc.thePlayer.posZ) > 1){
-                    KeyBinding.onTick(keyBindUseItem);
-                    setZ = false;
-                    if(firstBlock){
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(60);
-                                    firstBlock = false;
-                                }catch(Exception e){
-                                }
-                            }
-                        }).start();
-                    }
-
-                }
-
 
 
             } else if (noSoulSand) {
@@ -647,6 +603,7 @@ public class BuildMod {
 
             try {
 
+                Utils.addCustomLog("Slow digging");
                 setrot(digAngle);
                 setKeyBindState(keyBindForward, true);
                 setpitch(45);
@@ -683,9 +640,10 @@ public class BuildMod {
         public void run() {
 
             try {
+                Utils.addCustomLog("Slow digging");
                 setrot(digAngle);
                 setKeyBindState(keyBindForward, true);
-                mc.thePlayer.rotationPitch = 45;
+                setpitch(45);
 
                 while(!(Math.abs(corner2x - corner1x) - 2 <= Math.abs(originalX - (int) mc.thePlayer.posX))) {
                     KeyBinding.onTick(keyBindAttack);
@@ -1028,7 +986,6 @@ public class BuildMod {
        if(mc.thePlayer.openContainer instanceof ContainerChest || mc.currentScreen instanceof  GuiInventory) {
            mc.playerController.windowClick(windowID, slotID, mouseButtonClicked, mode, mc.thePlayer);
            Utils.addCustomLog("Pressing slot : " + slotID);
-           stop();
        }
        else {
            Utils.addCustomMessage(EnumChatFormatting.RED + "Didn't open window! This shouldn't happen and the script has been disabled. Please immediately report to the developer.");
@@ -1044,7 +1001,7 @@ public class BuildMod {
             @Override
             public void run() {
                 try {
-                    KeyBinding.onTick(keyBindUseItem);
+                    setKeyBindState(keyBindUseItem, true);
                     setKeyBindState(keyBindBackward, false);
                     firstBlock = true;
                     placeSoulSandBlock1 = false;
