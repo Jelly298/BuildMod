@@ -232,6 +232,9 @@ public class BuildMod {
                 else
                     setpitch(34);
 
+               // System.out.println();
+                if(Math.abs((corner2z - mc.thePlayer.posZ)) > 2f)
+                    firstBlock = false;
                 if (!firstBlock)
                     setHotbarIndex(0);
 
